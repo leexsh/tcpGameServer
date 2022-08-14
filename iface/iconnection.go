@@ -12,7 +12,9 @@ type IConnection interface {
 	// 获取conn id
 	GetConnId() uint32
 	// 获取对端ip:端口
-	RemoteAddr() *net.Addr
+	RemoteAddr() net.Addr
 	// 发送数据
 	Send(data []byte) error
 }
+
+type HandleFunc func(*net.TCPConn, []byte, int) error

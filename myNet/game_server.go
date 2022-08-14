@@ -1,6 +1,7 @@
-package net
+package myNet
 
 import (
+	"errors"
 	"fmt"
 	"net"
 )
@@ -10,6 +11,14 @@ type GameServer struct {
 	IPVersion string // IP版本
 	IP        string // IP地址
 	Port      string // 端口
+}
+
+func CallBackToClient(conn *net.TCPConn, buf []byte, cnt int) error {
+	_, err := conn.Write(buf[:cnt])
+	if err != nil {
+		return errors.New("call back fail")
+	}
+	return nil
 }
 
 func (g *GameServer) Start() {
@@ -26,27 +35,16 @@ func (g *GameServer) Start() {
 			return
 		}
 		fmt.Println("[Server]start server success")
-
+		var cid uint32 = 0
 		// 3.listen
 		for {
 			conn, err := listener.AcceptTCP()
 			if err != nil {
 				continue
 			}
-			// go
-			go func() {
-				for {
-					buf := make([]byte, 512)
-					cnt, err := conn.Read(buf)
-					if err != nil {
-						continue
-					}
-					if _, err = conn.Write(buf[:cnt]); err != nil {
-						fmt.Printf("write err")
-						break
-					}
-				}
-			}()
+			dealConn := NewConnection(conn, cid, CallBackToClient)
+			cid++
+			go dealConn.Start()
 		}
 	}()
 

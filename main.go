@@ -1,11 +1,11 @@
 package main
 
 import (
-	"leexsh/tcpGameServer/net"
+	"leexsh/TCPGameServer/myNet"
 )
 
 func main() {
-	s := net.NewServer("myserver")
+	s := myNet.NewServer("server")
 	s.Start()
 	select {}
 
