@@ -1,6 +1,6 @@
 package myNet
 
-import "leexsh/TCPGameServer/iface"
+import "leexsh/TCPGame/TCPGameServer/iface"
 
 type Request struct {
 	// 客户端的连接

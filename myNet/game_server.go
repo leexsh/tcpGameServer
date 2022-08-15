@@ -1,24 +1,22 @@
 package myNet
 
 import (
-	"errors"
 	"fmt"
+	"leexsh/TCPGame/TCPGameServer/iface"
 	"net"
 )
 
 type GameServer struct {
-	Name      string // 服务名称
-	IPVersion string // IP版本
-	IP        string // IP地址
-	Port      string // 端口
+	Name      string        // 服务名称
+	IPVersion string        // IP版本
+	IP        string        // IP地址
+	Port      string        // 端口
+	Router    iface.IRouter // 路由
 }
 
-func CallBackToClient(conn *net.TCPConn, buf []byte, cnt int) error {
-	_, err := conn.Write(buf[:cnt])
-	if err != nil {
-		return errors.New("call back fail")
-	}
-	return nil
+func (g *GameServer) AddRouter(router iface.IRouter) {
+	g.Router = router
+	fmt.Println("[server]add router success")
 }
 
 func (g *GameServer) Start() {
@@ -42,7 +40,7 @@ func (g *GameServer) Start() {
 			if err != nil {
 				continue
 			}
-			dealConn := NewConnection(conn, cid, CallBackToClient)
+			dealConn := NewConnection(conn, cid, g.Router)
 			cid++
 			go dealConn.Start()
 		}
@@ -69,6 +67,7 @@ func NewServer(name string) *GameServer {
 		IPVersion: "tcp4",
 		IP:        "0.0.0.0",
 		Port:      "8888",
+		Router:    nil,
 	}
 	return s
 }

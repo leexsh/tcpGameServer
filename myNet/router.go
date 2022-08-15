@@ -1,6 +1,6 @@
 package myNet
 
-import "leexsh/TCPGameServer/iface"
+import "leexsh/TCPGame/TCPGameServer/iface"
 
 // BaseRouter 继承于IRouter  后续具体Router只需要适配BaseRouter即可
 type BaseRouter struct {

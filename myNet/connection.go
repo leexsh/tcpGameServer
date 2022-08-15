@@ -2,7 +2,7 @@ package myNet
 
 import (
 	"fmt"
-	"leexsh/TCPGameServer/iface"
+	"leexsh/TCPGame/TCPGameServer/iface"
 	"net"
 )
 
@@ -14,17 +14,17 @@ type Connection struct {
 	// bool is close
 	IsClosed bool
 
-	// handle func
-	HandleMethod iface.HandleFunc
-	ExitChan     chan bool
+	ExitChan chan bool
+	Router   iface.IRouter
 }
 
-func NewConnection(conn *net.TCPConn, id uint32, callback iface.HandleFunc) *Connection {
+func NewConnection(conn *net.TCPConn, id uint32, router iface.IRouter) *Connection {
 	c := &Connection{
-		Conn:         conn,
-		ConnID:       id,
-		HandleMethod: callback,
-		ExitChan:     make(chan bool, 1),
+		Conn:     conn,
+		ConnID:   id,
+		ExitChan: make(chan bool, 1),
+		Router:   router,
+		IsClosed: false,
 	}
 	return c
 }
@@ -36,12 +36,22 @@ func (c *Connection) StartRead() {
 		buf := make([]byte, 512)
 		cnt, err := c.Conn.Read(buf)
 		if err != nil {
-			fmt.Println("[server] read err")
+			fmt.Println("[server] read err, cnt is: ", cnt)
 			break
 		}
-		if err := c.HandleMethod(c.Conn, buf, cnt); err != nil {
-			break
+		// if err := c.HandleMethod(c.Conn, buf, cnt); err != nil {
+		// 	break
+		// }
+		req := &Request{
+			Conn: c,
+			Data: buf,
 		}
+		// 从路由中找到对应的router
+		go func(req iface.IReqeust) {
+			c.Router.PreHandle(req)
+			c.Router.Handle(req)
+			c.Router.AfterHandle(req)
+		}(req)
 	}
 }
 

@@ -1,3 +1,3 @@
-module leexsh/TCPGameServer
+module leexsh/TCPGame/TCPGameServer
 
 go 1.17
