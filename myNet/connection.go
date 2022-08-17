@@ -3,6 +3,7 @@ package myNet
 import (
 	"fmt"
 	"leexsh/TCPGame/TCPGameServer/iface"
+	"leexsh/TCPGame/TCPGameServer/utils"
 	"net"
 )
 
@@ -33,15 +34,12 @@ func (c *Connection) StartRead() {
 	defer c.Conn.Close()
 	for {
 		// read form client
-		buf := make([]byte, 512)
+		buf := make([]byte, utils.YmlConfig.GlobalConfig.MaxPackageSize)
 		cnt, err := c.Conn.Read(buf)
 		if err != nil {
 			fmt.Println("[server] read err, cnt is: ", cnt)
 			break
 		}
-		// if err := c.HandleMethod(c.Conn, buf, cnt); err != nil {
-		// 	break
-		// }
 		req := &Request{
 			Conn: c,
 			Data: buf,

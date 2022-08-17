@@ -1,0 +1,7 @@
+globalCfg:
+  ip: "127.0.0.1"
+  tcp_port: 8888
+  name: "GameServer"
+  version: "v1.0"
+  maxConn: 1000
+  maxPackageSize: 512

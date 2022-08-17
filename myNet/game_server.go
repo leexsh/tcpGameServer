@@ -3,7 +3,9 @@ package myNet
 import (
 	"fmt"
 	"leexsh/TCPGame/TCPGameServer/iface"
+	"leexsh/TCPGame/TCPGameServer/utils"
 	"net"
+	"strconv"
 )
 
 type GameServer struct {
@@ -20,7 +22,7 @@ func (g *GameServer) AddRouter(router iface.IRouter) {
 }
 
 func (g *GameServer) Start() {
-	fmt.Printf("[Server]server is running, IP: %s, port:%s", g.IP, g.Port)
+	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s", g.Name, g.IP, g.Port)
 	go func() {
 		// 1.get tcp addr
 		addr, err := net.ResolveTCPAddr(g.IPVersion, fmt.Sprintf("%s:%s", g.IP, g.Port))
@@ -63,10 +65,10 @@ func (g *GameServer) Serve() {
 
 func NewServer(name string) *GameServer {
 	s := &GameServer{
-		Name:      name,
+		Name:      utils.YmlConfig.GlobalConfig.Name,
 		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      "8888",
+		IP:        utils.YmlConfig.GlobalConfig.IP,
+		Port:      strconv.Itoa(utils.YmlConfig.GlobalConfig.TcpPort),
 		Router:    nil,
 	}
 	return s
