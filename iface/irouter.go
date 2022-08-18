@@ -1,5 +1,9 @@
 package iface
 
+/*
+	抽象的server interface
+*/
+
 type IRouter interface {
 	// 处理conn前
 	PreHandle(req IReqeust)

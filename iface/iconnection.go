@@ -2,6 +2,10 @@ package iface
 
 import "net"
 
+/*
+	connect连接的抽象
+*/
+
 type IConnection interface {
 	// 启动连接
 	Start()

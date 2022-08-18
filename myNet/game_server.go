@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+/*
+	game server模块 实现iserver借款==接口
+*/
+
 type GameServer struct {
 	Name      string        // 服务名称
 	IPVersion string        // IP版本

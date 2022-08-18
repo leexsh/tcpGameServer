@@ -1,5 +1,9 @@
 package iface
 
+/*
+	抽象的请求
+*/
+
 type IReqeust interface {
 	// 得到当前请求
 	GetConnection() IConnection

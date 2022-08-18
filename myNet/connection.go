@@ -7,6 +7,10 @@ import (
 	"net"
 )
 
+/*
+	connect连接
+*/
+
 type Connection struct {
 	Conn *net.TCPConn
 

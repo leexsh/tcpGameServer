@@ -23,7 +23,6 @@ type Config struct {
 }
 
 func (g *Config) ReadConfig() {
-	// data, err := ioutil.ReadFile("../conf/config.yml")
 	data, err := ioutil.ReadFile("conf/config.yml")
 	fmt.Println(string(data))
 	if err != nil {

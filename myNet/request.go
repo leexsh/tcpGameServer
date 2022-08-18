@@ -2,6 +2,10 @@ package myNet
 
 import "leexsh/TCPGame/TCPGameServer/iface"
 
+/*
+	客户端请求的封装
+*/
+
 type Request struct {
 	// 客户端的连接
 	Conn iface.IConnection
