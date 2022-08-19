@@ -24,6 +24,7 @@ type Connection struct {
 }
 
 func NewConnection(conn *net.TCPConn, id uint32, router iface.IRouter) *Connection {
+	utils.LoadConfig()
 	c := &Connection{
 		Conn:     conn,
 		ConnID:   id,
@@ -38,22 +39,23 @@ func (c *Connection) StartRead() {
 	defer c.Conn.Close()
 	for {
 		// read form client
+		// todo: use data pack to read
 		buf := make([]byte, utils.YmlConfig.GlobalConfig.MaxPackageSize)
 		cnt, err := c.Conn.Read(buf)
 		if err != nil {
 			fmt.Println("[server] read err, cnt is: ", cnt)
 			break
 		}
-		req := &Request{
-			Conn: c,
-			Data: buf,
-		}
+		// req := &Request{
+		// 	Conn: c,
+		// 	Data: buf,
+		// }
 		// 从路由中找到对应的router
 		go func(req iface.IReqeust) {
 			c.Router.PreHandle(req)
 			c.Router.Handle(req)
 			c.Router.AfterHandle(req)
-		}(req)
+		}(nil)
 	}
 }
 

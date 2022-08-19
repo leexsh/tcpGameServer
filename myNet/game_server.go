@@ -68,6 +68,7 @@ func (g *GameServer) Serve() {
 }
 
 func NewServer(name string) *GameServer {
+	utils.LoadConfig()
 	s := &GameServer{
 		Name:      utils.YmlConfig.GlobalConfig.Name,
 		IPVersion: "tcp4",

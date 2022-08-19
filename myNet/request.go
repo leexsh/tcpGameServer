@@ -8,15 +8,19 @@ import "leexsh/TCPGame/TCPGameServer/iface"
 
 type Request struct {
 	// 客户端的连接
-	Conn iface.IConnection
+	conn iface.IConnection
 	// 客户端请求的数据
-	Data []byte
+	msg iface.IMessage
 }
 
 func (r *Request) GetConnection() iface.IConnection {
-	return r.Conn
+	return r.conn
+}
+
+func (r *Request) GetDataId() uint32 {
+	return r.msg.GetMsgId()
 }
 
 func (r *Request) GetData() []byte {
-	return r.Data
+	return r.msg.GetData()
 }

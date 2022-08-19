@@ -37,6 +37,10 @@ func (g *Config) ReadConfig() {
 
 var YmlConfig *Config
 
+func LoadConfig() {
+	YmlConfig.ReadConfig()
+}
+
 func init() {
 	// 未加载配置文件的时候
 	YmlConfig = &Config{
@@ -49,5 +53,5 @@ func init() {
 			MaxConn:        1000,
 			MaxPackageSize: 512,
 		}}
-	YmlConfig.ReadConfig()
+	// YmlConfig.ReadConfig()
 }
