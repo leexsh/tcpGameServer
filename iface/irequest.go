@@ -10,4 +10,5 @@ type IReqeust interface {
 	// 得到当前请求的数据
 	GetData() []byte
 	GetDataId() uint32
+	GetMsgType() uint32
 }

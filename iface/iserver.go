@@ -12,5 +12,5 @@ type IServer interface {
 	// 运行
 	Serve()
 
-	AddRouter(router IRouter)
+	AddRouter(uint32, IRouter)
 }

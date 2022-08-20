@@ -1,6 +1,6 @@
 package myNet
 
-import "leexsh/TCPGame/TCPGameServer/iface"
+import "TCPGameServer/iface"
 
 /*
 	请求处理的封装

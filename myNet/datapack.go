@@ -1,11 +1,11 @@
 package myNet
 
 import (
+	"TCPGameServer/iface"
+	"TCPGameServer/utils"
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"leexsh/TCPGame/TCPGameServer/iface"
-	"leexsh/TCPGame/TCPGameServer/utils"
 )
 
 /*
@@ -18,8 +18,8 @@ type DataPack struct {
 var DataPackTool = &DataPack{}
 
 func (d *DataPack) GetHeadLen() uint32 {
-	// uint32 4 byte so head is 8 byte
-	return 8
+	// uint32 4 byte so head is 12 byte
+	return 12
 }
 
 func (d *DataPack) Pack(msg iface.IMessage) ([]byte, error) {
@@ -34,7 +34,11 @@ func (d *DataPack) Pack(msg iface.IMessage) ([]byte, error) {
 	if err := binary.Write(buf, binary.LittleEndian, msg.GetMsgId()); err != nil {
 		return nil, err
 	}
-	// 4. write data
+	// 4. write data type
+	if err := binary.Write(buf, binary.LittleEndian, msg.GetMsgType()); err != nil {
+		return nil, err
+	}
+	// 5. write data
 	if err := binary.Write(buf, binary.LittleEndian, msg.GetData()); err != nil {
 		return nil, err
 	}
@@ -52,7 +56,10 @@ func (d *DataPack) UnPack(bytesData []byte) (iface.IMessage, error) {
 	if err := binary.Read(dataBuf, binary.LittleEndian, &msg.ID); err != nil {
 		return nil, err
 	}
-
+	err := binary.Read(dataBuf, binary.LittleEndian, &msg.Type)
+	if err != nil {
+		return nil, err
+	}
 	if utils.YmlConfig.GlobalConfig.MaxPackageSize > 0 &&
 		msg.GetDataLen() > utils.YmlConfig.GlobalConfig.MaxPackageSize {
 		return nil, errors.New("package too large")

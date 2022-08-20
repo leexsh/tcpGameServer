@@ -1,6 +1,6 @@
 package myNet
 
-import "leexsh/TCPGame/TCPGameServer/iface"
+import "TCPGameServer/iface"
 
 /*
 	客户端请求的封装
@@ -23,4 +23,8 @@ func (r *Request) GetDataId() uint32 {
 
 func (r *Request) GetData() []byte {
 	return r.msg.GetData()
+}
+
+func (r *Request) GetMsgType() uint32 {
+	return r.msg.GetMsgType()
 }

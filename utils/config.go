@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"TCPGameServer/iface"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"leexsh/TCPGame/TCPGameServer/iface"
 )
 
 type globalCfg struct {
@@ -45,7 +45,7 @@ func init() {
 	// 未加载配置文件的时候
 	YmlConfig = &Config{
 		globalCfg{
-			TcpServer:      nil,
+			// TcpServer:      nil,
 			IP:             "127.0.0.1",
 			TcpPort:        8888,
 			Name:           "GameServer",

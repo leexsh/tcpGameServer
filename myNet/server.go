@@ -1,9 +1,9 @@
 package myNet
 
 import (
+	"TCPGameServer/iface"
+	"TCPGameServer/utils"
 	"fmt"
-	"leexsh/TCPGame/TCPGameServer/iface"
-	"leexsh/TCPGame/TCPGameServer/utils"
 	"net"
 	"strconv"
 )
@@ -12,20 +12,20 @@ import (
 	game server模块 实现iserver借款==接口
 */
 
-type GameServer struct {
-	Name      string        // 服务名称
-	IPVersion string        // IP版本
-	IP        string        // IP地址
-	Port      string        // 端口
-	Router    iface.IRouter // 路由
+type Server struct {
+	Name      string                // 服务名称
+	IPVersion string                // IP版本
+	IP        string                // IP地址
+	Port      string                // 端口
+	MsgHander iface.IMessageHandler // 路由
 }
 
-func (g *GameServer) AddRouter(router iface.IRouter) {
-	g.Router = router
+func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
+	g.MsgHander.AddRouter(msgType, router)
 	fmt.Println("[server]add router success")
 }
 
-func (g *GameServer) Start() {
+func (g *Server) Start() {
 	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s", g.Name, g.IP, g.Port)
 	go func() {
 		// 1.get tcp addr
@@ -46,7 +46,7 @@ func (g *GameServer) Start() {
 			if err != nil {
 				continue
 			}
-			dealConn := NewConnection(conn, cid, g.Router)
+			dealConn := NewConnection(conn, cid, g.MsgHander)
 			cid++
 			go dealConn.Start()
 		}
@@ -54,11 +54,11 @@ func (g *GameServer) Start() {
 
 }
 
-func (g *GameServer) Stop() {
+func (g *Server) Stop() {
 	// todo: stop
 }
 
-func (g *GameServer) Serve() {
+func (g *Server) Serve() {
 	g.Start()
 
 	// do another things
@@ -67,14 +67,13 @@ func (g *GameServer) Serve() {
 	select {}
 }
 
-func NewServer(name string) *GameServer {
+func NewServer(name string) *Server {
 	utils.LoadConfig()
-	s := &GameServer{
+	return &Server{
 		Name:      utils.YmlConfig.GlobalConfig.Name,
 		IPVersion: "tcp4",
 		IP:        utils.YmlConfig.GlobalConfig.IP,
 		Port:      strconv.Itoa(utils.YmlConfig.GlobalConfig.TcpPort),
-		Router:    nil,
+		MsgHander: NewMsgHandle(),
 	}
-	return s
 }

@@ -1,11 +1,11 @@
 package myNet
 
 import (
+	"TCPGameServer/iface"
+	"TCPGameServer/utils"
 	"errors"
 	"fmt"
 	"io"
-	"leexsh/TCPGame/TCPGameServer/iface"
-	"leexsh/TCPGame/TCPGameServer/utils"
 	"net"
 )
 
@@ -21,18 +21,18 @@ type Connection struct {
 	// bool is close
 	IsClosed bool
 
-	ExitChan chan bool
-	Router   iface.IRouter
+	ExitChan   chan bool
+	MsgHandler iface.IMessageHandler
 }
 
-func NewConnection(conn *net.TCPConn, id uint32, router iface.IRouter) *Connection {
+func NewConnection(conn *net.TCPConn, id uint32, handler iface.IMessageHandler) *Connection {
 	utils.LoadConfig()
 	c := &Connection{
-		Conn:     conn,
-		ConnID:   id,
-		ExitChan: make(chan bool, 1),
-		Router:   router,
-		IsClosed: false,
+		Conn:       conn,
+		ConnID:     id,
+		ExitChan:   make(chan bool, 1),
+		IsClosed:   false,
+		MsgHandler: handler,
 	}
 	return c
 }
@@ -66,12 +66,8 @@ func (c *Connection) StartRead() {
 			msg:  msg,
 		}
 
-		// 从路由中找到对应的router
-		go func(req iface.IReqeust) {
-			c.Router.PreHandle(req)
-			c.Router.Handle(req)
-			c.Router.AfterHandle(req)
-		}(req)
+		// 由对应的msgId对应的router进行处理
+		go c.MsgHandler.DoMsgHandler(req)
 	}
 }
 
@@ -107,13 +103,13 @@ func (c *Connection) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
 }
 
-func (c *Connection) SendMsg(msgId uint32, data []byte) error {
+func (c *Connection) SendMsg(msgId uint32, msgType uint32, data []byte) error {
 	if c.IsClosed {
 		return errors.New("[server]conn is closed")
 	}
 
 	// pack
-	binaryData, err := DataPackTool.Pack(NewMsg(msgId, data))
+	binaryData, err := DataPackTool.Pack(NewMsg(msgId, msgType, data))
 	if err != nil {
 		return err
 	}
