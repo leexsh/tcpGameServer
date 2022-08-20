@@ -6,16 +6,24 @@ package myNet
 
 type Message struct {
 	ID      uint32 // 消息ID
-	DateLen uint32 // 消息长度
+	DataLen uint32 // 消息长度
 	Data    []byte // 消息内容
+}
+
+func NewMsg(msgId uint32, data []byte) *Message {
+	return &Message{
+		ID:      msgId,
+		DataLen: uint32(len(data)),
+		Data:    data,
+	}
 }
 
 func (m *Message) SetMsgID(u uint32) {
 	m.ID = u
 }
 
-func (m *Message) SetMsgLen(u uint32) {
-	m.DateLen = u
+func (m *Message) SetDataLen(u uint32) {
+	m.DataLen = u
 }
 
 func (m *Message) SetData(bytes []byte) {
@@ -26,8 +34,8 @@ func (m *Message) GetMsgId() uint32 {
 	return m.ID
 }
 
-func (m *Message) GetMsgLen() uint32 {
-	return m.DateLen
+func (m *Message) GetDataLen() uint32 {
+	return m.DataLen
 }
 
 func (m *Message) GetData() []byte {

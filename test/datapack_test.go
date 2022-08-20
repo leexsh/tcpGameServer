@@ -35,15 +35,15 @@ func TestDataPack(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if msgHead.GetMsgLen() > 0 {
+				if msgHead.GetDataLen() > 0 {
 					// 2. read data
 					msg := msgHead.(*myNet.Message)
-					msg.Data = make([]byte, msg.GetMsgLen())
+					msg.Data = make([]byte, msg.GetDataLen())
 					_, err := io.ReadFull(conn, msg.Data)
 					if err != nil {
 						t.Fatal(err)
 					}
-					fmt.Println("id:", msg.ID, ", len: ", msg.DateLen, " data: ", string(msg.Data))
+					fmt.Println("id:", msg.ID, ", len: ", msg.DataLen, " data: ", string(msg.Data))
 				}
 
 			}
@@ -58,7 +58,7 @@ func TestDataPack(t *testing.T) {
 	dp := myNet.NewDataPack()
 	msg1 := &myNet.Message{
 		ID:      1,
-		DateLen: 4,
+		DataLen: 4,
 		Data:    []byte{'1', '2', '3', '4'},
 	}
 	data1, err := dp.Pack(msg1)
@@ -67,7 +67,7 @@ func TestDataPack(t *testing.T) {
 	}
 	msg2 := &myNet.Message{
 		ID:      2,
-		DateLen: 5,
+		DataLen: 5,
 		Data:    []byte{'h', 'e', 'l', 'l', '0'},
 	}
 	data2, err := dp.Pack(msg2)

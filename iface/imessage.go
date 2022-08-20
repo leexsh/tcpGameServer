@@ -5,10 +5,10 @@ package iface
 */
 type IMessage interface {
 	SetMsgID(uint32)
-	SetMsgLen(uint32)
+	SetDataLen(uint32)
 	SetData([]byte)
 
 	GetMsgId() uint32
-	GetMsgLen() uint32
+	GetDataLen() uint32
 	GetData() []byte
 }
