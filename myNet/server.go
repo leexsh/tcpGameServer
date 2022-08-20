@@ -22,7 +22,6 @@ type Server struct {
 
 func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
 	g.MsgHander.AddRouter(msgType, router)
-	fmt.Println("[server]add router success")
 }
 
 func (g *Server) Start() {

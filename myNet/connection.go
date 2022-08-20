@@ -23,6 +23,7 @@ type Connection struct {
 
 	ExitChan   chan bool
 	MsgHandler iface.IMessageHandler
+	MsgChan    chan []byte // 读写协程之间的chan(无缓冲)
 }
 
 func NewConnection(conn *net.TCPConn, id uint32, handler iface.IMessageHandler) *Connection {
@@ -33,12 +34,17 @@ func NewConnection(conn *net.TCPConn, id uint32, handler iface.IMessageHandler) 
 		ExitChan:   make(chan bool, 1),
 		IsClosed:   false,
 		MsgHandler: handler,
+		MsgChan:    make(chan []byte),
 	}
 	return c
 }
 
+// read Goroutine
 func (c *Connection) StartRead() {
-	defer c.Conn.Close()
+	fmt.Println("read Goroutine is running")
+	defer fmt.Println("read Goroutine has existed")
+	// when closed, send exit flag to write Goroutine
+	defer c.Stop()
 	for {
 		// 1.read head 8 bytes
 		headData := make([]byte, DataPackTool.GetHeadLen())
@@ -71,9 +77,29 @@ func (c *Connection) StartRead() {
 	}
 }
 
+// write Goroutine
+func (c *Connection) StartWrite() {
+	fmt.Println("writer Goroutine is running")
+	defer fmt.Println("writer Goroutine has existed")
+	for {
+		select {
+		case data := <-c.MsgChan:
+			_, err := c.Conn.Write(data)
+			if err != nil {
+				fmt.Println("send to client error")
+				return
+			}
+		case <-c.ExitChan:
+			// reader exit, so notify writer to exit
+			return
+		}
+	}
+}
+
 func (c *Connection) Start() {
 	fmt.Println("[server] conn is start, conn id is:", c.ConnID)
-	c.StartRead()
+	go c.StartRead()
+	go c.StartWrite()
 }
 
 func (c *Connection) Stop() {
@@ -82,9 +108,11 @@ func (c *Connection) Stop() {
 		return
 	}
 	c.IsClosed = true
-
 	defer c.Conn.Close()
+	// exit
+	c.ExitChan <- true
 	close(c.ExitChan)
+	close(c.MsgChan)
 }
 
 func (m *Message) SendMsg() {
@@ -113,11 +141,8 @@ func (c *Connection) SendMsg(msgId uint32, msgType uint32, data []byte) error {
 	if err != nil {
 		return err
 	}
-	// send
-	_, err = c.Conn.Write(binaryData)
-	if err != nil {
-		fmt.Println("[server] send to client error")
-		return errors.New("[server]send to client error")
-	}
+
+	// send to write Goroutine
+	c.MsgChan <- binaryData
 	return nil
 }
