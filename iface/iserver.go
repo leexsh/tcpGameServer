@@ -13,4 +13,6 @@ type IServer interface {
 	Serve()
 
 	AddRouter(uint32, IRouter)
+
+	GetConnManager() IConnManager
 }

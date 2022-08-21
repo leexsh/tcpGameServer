@@ -19,6 +19,8 @@ type MessageHandle struct {
 	TaskQueue []chan iface.IReqeust
 	// 工作池的worker的数量
 	WorkPoolSize uint32
+
+	ExitQuit chan bool
 }
 
 func NewMsgHandle() *MessageHandle {
@@ -27,6 +29,7 @@ func NewMsgHandle() *MessageHandle {
 		Apis:         make(map[uint32]iface.IRouter, 32),
 		TaskQueue:    make([]chan iface.IReqeust, utils.YmlConfig.GlobalConfig.WorkPoolSize),
 		WorkPoolSize: utils.YmlConfig.GlobalConfig.WorkPoolSize, // 全局配置获取
+		ExitQuit:     make(chan bool),
 	}
 }
 
@@ -57,6 +60,12 @@ func (m *MessageHandle) StartWorkPool() {
 	}
 }
 
+func (m *MessageHandle) StopWorkPool() {
+	for i := 0; i < int(m.WorkPoolSize); i++ {
+		m.ExitQuit <- true
+	}
+}
+
 func (m *MessageHandle) startOneWokrer(workerID int, taskQueue chan iface.IReqeust) {
 	fmt.Println("start worker id: ", workerID)
 	// ，每个worker都在堵塞等待队列中来的req
@@ -64,6 +73,8 @@ func (m *MessageHandle) startOneWokrer(workerID int, taskQueue chan iface.IReqeu
 		select {
 		case req := <-taskQueue:
 			m.DoMsgHandler(req)
+		default:
+			break
 		}
 	}
 }

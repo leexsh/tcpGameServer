@@ -24,9 +24,10 @@ type Connection struct {
 	ExitChan   chan bool
 	MsgHandler iface.IMessageHandler
 	MsgChan    chan []byte // 读写协程之间的chan(无缓冲)
+	TCPServer  iface.IServer
 }
 
-func NewConnection(conn *net.TCPConn, id uint32, handler iface.IMessageHandler) *Connection {
+func NewConnection(server iface.IServer, conn *net.TCPConn, id uint32, handler iface.IMessageHandler) *Connection {
 	utils.LoadConfig()
 	c := &Connection{
 		Conn:       conn,
@@ -35,7 +36,9 @@ func NewConnection(conn *net.TCPConn, id uint32, handler iface.IMessageHandler) 
 		IsClosed:   false,
 		MsgHandler: handler,
 		MsgChan:    make(chan []byte),
+		TCPServer:  server,
 	}
+	c.TCPServer.GetConnManager().Add(c)
 	return c
 }
 
@@ -119,6 +122,7 @@ func (c *Connection) Stop() {
 	c.ExitChan <- true
 	close(c.ExitChan)
 	close(c.MsgChan)
+	c.TCPServer.GetConnManager().Remove(c)
 }
 
 func (m *Message) SendMsg() {

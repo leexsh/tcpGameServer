@@ -13,22 +13,23 @@ import (
 */
 
 type Server struct {
-	Name      string                // 服务名称
-	IPVersion string                // IP版本
-	IP        string                // IP地址
-	Port      string                // 端口
-	MsgHander iface.IMessageHandler // 路由
+	Name        string                // 服务名称
+	IPVersion   string                // IP版本
+	IP          string                // IP地址
+	Port        string                // 端口
+	MsgHandler  iface.IMessageHandler // 路由
+	ConnManager iface.IConnManager    // conn manager
 }
 
 func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
-	g.MsgHander.AddRouter(msgType, router)
+	g.MsgHandler.AddRouter(msgType, router)
 }
 
 func (g *Server) Start() {
 	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s\n", g.Name, g.IP, g.Port)
 	go func() {
 		// 0.start work pool
-		g.MsgHander.StartWorkPool()
+		g.MsgHandler.StartWorkPool()
 
 		// 1.get tcp addr
 		addr, err := net.ResolveTCPAddr(g.IPVersion, fmt.Sprintf("%s:%s", g.IP, g.Port))
@@ -48,7 +49,14 @@ func (g *Server) Start() {
 			if err != nil {
 				continue
 			}
-			dealConn := NewConnection(conn, cid, g.MsgHander)
+			// 最大连接个数判断
+			if g.ConnManager.Len() > utils.YmlConfig.GlobalConfig.MaxConn {
+				conn.Write([]byte("connection limit"))
+				conn.Close()
+				continue
+			}
+
+			dealConn := NewConnection(g, conn, cid, g.MsgHandler)
 			cid++
 			go dealConn.Start()
 		}
@@ -57,7 +65,9 @@ func (g *Server) Start() {
 }
 
 func (g *Server) Stop() {
-	// todo: stop
+	fmt.Println("server stop ")
+	g.ConnManager.ClearConn()
+	g.MsgHandler.StopWorkPool()
 }
 
 func (g *Server) Serve() {
@@ -72,10 +82,15 @@ func (g *Server) Serve() {
 func NewServer(name string) *Server {
 	utils.LoadConfig()
 	return &Server{
-		Name:      utils.YmlConfig.GlobalConfig.Name,
-		IPVersion: "tcp4",
-		IP:        utils.YmlConfig.GlobalConfig.IP,
-		Port:      strconv.Itoa(utils.YmlConfig.GlobalConfig.TcpPort),
-		MsgHander: NewMsgHandle(),
+		Name:        utils.YmlConfig.GlobalConfig.Name,
+		IPVersion:   "tcp4",
+		IP:          utils.YmlConfig.GlobalConfig.IP,
+		Port:        strconv.Itoa(utils.YmlConfig.GlobalConfig.TcpPort),
+		MsgHandler:  NewMsgHandle(),
+		ConnManager: NewConnManager(),
 	}
+}
+
+func (g *Server) GetConnManager() iface.IConnManager {
+	return g.ConnManager
 }

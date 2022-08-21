@@ -20,5 +20,9 @@
 - 多任务和消息队列处理
     ![picture](./mySource/queue_pict3.jpg)
 <center>多任务和消息队列示意图 (from 飞书文档)</center>
+
+- Hook操作流程
+  ![picture](./mySource/pict4.jpg)
+<center>Hook操作流程示意图示意图 (from 飞书文档)</center>
   
 

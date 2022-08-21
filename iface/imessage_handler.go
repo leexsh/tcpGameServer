@@ -17,4 +17,6 @@ type IMessageHandler interface {
 
 	// 分发请求
 	DispatchMsg(IReqeust)
+
+	StopWorkPool()
 }
