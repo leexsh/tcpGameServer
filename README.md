@@ -16,5 +16,9 @@
 - 解决请求的读写分离
     ![图片](./mySource/read_write_pict2.jpg)
 <center>读写分离示意图 (from 飞书文档)</center>
+
+- 多任务和消息队列处理
+    ![picture](./mySource/queue_pict3.jpg)
+<center>多任务和消息队列示意图 (from 飞书文档)</center>
   
 

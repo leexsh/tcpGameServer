@@ -25,8 +25,11 @@ func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
 }
 
 func (g *Server) Start() {
-	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s", g.Name, g.IP, g.Port)
+	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s\n", g.Name, g.IP, g.Port)
 	go func() {
+		// 0.start work pool
+		g.MsgHander.StartWorkPool()
+
 		// 1.get tcp addr
 		addr, err := net.ResolveTCPAddr(g.IPVersion, fmt.Sprintf("%s:%s", g.IP, g.Port))
 		if err != nil {

@@ -6,3 +6,4 @@ globalCfg:
   version: "v1.0"
   maxConn: 1000
   maxPackageSize: 512
+  workPoolSize: 32

@@ -11,4 +11,10 @@ type IMessageHandler interface {
 
 	// add router
 	AddRouter(msgTpye uint32, router IRouter) error
+
+	// start worker pool
+	StartWorkPool()
+
+	// 分发请求
+	DispatchMsg(IReqeust)
 }

@@ -73,7 +73,13 @@ func (c *Connection) StartRead() {
 		}
 
 		// 由对应的msgId对应的router进行处理
-		go c.MsgHandler.DoMsgHandler(req)
+		if utils.YmlConfig.GlobalConfig.WorkPoolSize > 0 {
+			// 如果已经开启了workpool 则由workpool进行处理
+			c.MsgHandler.DispatchMsg(req)
+		} else {
+			// 否则直接处理即可
+			c.MsgHandler.DoMsgHandler(req)
+		}
 	}
 }
 
