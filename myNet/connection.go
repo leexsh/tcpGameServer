@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 )
 
 /*
@@ -25,6 +26,9 @@ type Connection struct {
 	MsgHandler iface.IMessageHandler
 	MsgChan    chan []byte // 读写协程之间的chan(无缓冲)
 	TCPServer  iface.IServer
+
+	property     map[string]interface{}
+	propertyLock sync.RWMutex
 }
 
 func NewConnection(server iface.IServer, conn *net.TCPConn, id uint32, handler iface.IMessageHandler) *Connection {
@@ -37,6 +41,7 @@ func NewConnection(server iface.IServer, conn *net.TCPConn, id uint32, handler i
 		MsgHandler: handler,
 		MsgChan:    make(chan []byte),
 		TCPServer:  server,
+		property:   make(map[string]interface{}, 32),
 	}
 	c.TCPServer.GetConnManager().Add(c)
 	return c
@@ -159,4 +164,25 @@ func (c *Connection) SendMsg(msgId uint32, msgType uint32, data []byte) error {
 	// send to write Goroutine
 	c.MsgChan <- binaryData
 	return nil
+}
+
+func (c *Connection) SetProperty(key string, value interface{}) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+	c.property[key] = value
+}
+
+func (c *Connection) GetProperty(key string) (interface{}, error) {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+	if property, ok := c.property[key]; ok {
+		return property, nil
+	}
+	return nil, errors.New("not found this key ")
+}
+
+func (c *Connection) RemoveProperty(key string) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.RUnlock()
+	delete(c.property, key)
 }

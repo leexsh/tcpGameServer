@@ -2,6 +2,16 @@
 
 > 结构参考：./mySource/struct.xmind
 
+```go
+    // 基本用户
+	myNet.NewServer("server")
+	s.AddRouter(1, &xxxx)
+	s.SetOnConnStart(xxx)
+	s.Start()
+```
+- 大致实现功能点
+  ![picture](./mySource/pict5.png)
+<center>功能结构图 (from xmind)</center>
 
 - 解决TCP粘包的问题：
 
@@ -23,6 +33,6 @@
 
 - Hook操作流程
   ![picture](./mySource/pict4.jpg)
-<center>Hook操作流程示意图示意图 (from 飞书文档)</center>
+<center>Hook操作流程示意图 (from 飞书文档)</center>
   
 
