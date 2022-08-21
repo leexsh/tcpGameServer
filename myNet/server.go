@@ -21,6 +21,8 @@ type Server struct {
 	ConnManager       iface.IConnManager    // conn manager
 	OnConnectionStart func(connection iface.IConnection)
 	OnConnectionStop  func(connection iface.IConnection)
+	packet            iface.IDataPack
+	exitChan          chan struct{}
 }
 
 func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
@@ -29,6 +31,7 @@ func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
 
 func (g *Server) Start() {
 	fmt.Printf("[Server]server name:%s is running, IP: %s, port:%s\n", g.Name, g.IP, g.Port)
+	g.exitChan = make(chan struct{})
 	go func() {
 		// 0.start work pool
 		g.MsgHandler.StartWorkPool()
@@ -46,30 +49,41 @@ func (g *Server) Start() {
 		fmt.Println("[Server]start server success")
 		var cid uint32 = 0
 		// 3.listen
-		for {
-			conn, err := listener.AcceptTCP()
+		go func() {
+			for {
+				conn, err := listener.AcceptTCP()
+				if err != nil {
+					continue
+				}
+				// 最大连接个数判断
+				if g.ConnManager.Len() > utils.YmlConfig.GlobalConfig.MaxConn {
+					conn.Write([]byte("connection limit"))
+					conn.Close()
+					continue
+				}
+
+				dealConn := NewConnection(g, conn, cid, g.MsgHandler)
+				cid++
+				go dealConn.Start()
+			}
+		}()
+		select {
+		case <-g.exitChan:
+			err := listener.Close()
 			if err != nil {
-				continue
+				fmt.Println("listern err")
 			}
-			// 最大连接个数判断
-			if g.ConnManager.Len() > utils.YmlConfig.GlobalConfig.MaxConn {
-				conn.Write([]byte("connection limit"))
-				conn.Close()
-				continue
-			}
-
-			dealConn := NewConnection(g, conn, cid, g.MsgHandler)
-			cid++
-			go dealConn.Start()
 		}
-	}()
 
+	}()
 }
 
 func (g *Server) Stop() {
 	fmt.Println("server stop ")
 	g.ConnManager.ClearConn()
 	g.MsgHandler.StopWorkPool()
+	g.exitChan <- struct{}{}
+	close(g.exitChan)
 }
 
 func (g *Server) Serve() {
@@ -90,6 +104,8 @@ func NewServer(name string) *Server {
 		Port:        strconv.Itoa(utils.YmlConfig.GlobalConfig.TcpPort),
 		MsgHandler:  NewMsgHandle(),
 		ConnManager: NewConnManager(),
+		exitChan:    nil,
+		packet:      DataPackTool,
 	}
 }
 
@@ -116,4 +132,12 @@ func (g *Server) CallOnCOnnStop(connection iface.IConnection) {
 	if g.OnConnectionStop != nil {
 		g.OnConnectionStop(connection)
 	}
+}
+
+func (g *Server) Packet() iface.IDataPack {
+	return g.packet
+}
+
+func init() {
+
 }

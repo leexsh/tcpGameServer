@@ -10,4 +10,5 @@ type IConnManager interface {
 	Get(uint32) IConnection
 	Len() int
 	ClearConn()
+	ClearOneConn(uint322 uint32)
 }

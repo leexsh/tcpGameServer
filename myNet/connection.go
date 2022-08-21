@@ -97,11 +97,13 @@ func (c *Connection) StartWrite() {
 	defer fmt.Println("writer Goroutine has existed")
 	for {
 		select {
-		case data := <-c.MsgChan:
-			_, err := c.Conn.Write(data)
-			if err != nil {
-				fmt.Println("send to client error")
-				return
+		case data, ok := <-c.MsgChan:
+			if ok {
+				_, err := c.Conn.Write(data)
+				if err != nil {
+					fmt.Println("send to client error")
+					return
+				}
 			}
 		case <-c.ExitChan:
 			// reader exit, so notify writer to exit

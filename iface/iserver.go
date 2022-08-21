@@ -25,4 +25,6 @@ type IServer interface {
 	CallOnConnStart(connection IConnection)
 	// call stop hook
 	CallOnCOnnStop(connection IConnection)
+
+	Packet() IDataPack
 }

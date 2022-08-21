@@ -53,3 +53,13 @@ func (c *ConnManager) ClearConn() {
 		delete(c.conns, id)
 	}
 }
+
+func (c *ConnManager) ClearOneConn(cid uint32) {
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
+
+	if conn, ok := c.conns[cid]; ok {
+		conn.Stop()
+		delete(c.conns, cid)
+	}
+}
