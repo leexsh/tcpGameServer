@@ -109,6 +109,9 @@ func (c *Connection) Start() {
 	fmt.Println("[server] conn is start, conn id is:", c.ConnID)
 	go c.StartRead()
 	go c.StartWrite()
+
+	// 调用hook函数
+	c.TCPServer.CallOnConnStart(c)
 }
 
 func (c *Connection) Stop() {
@@ -117,6 +120,7 @@ func (c *Connection) Stop() {
 		return
 	}
 	c.IsClosed = true
+	c.TCPServer.CallOnCOnnStop(c)
 	defer c.Conn.Close()
 	// exit
 	c.ExitChan <- true

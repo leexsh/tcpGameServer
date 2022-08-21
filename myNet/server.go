@@ -13,12 +13,14 @@ import (
 */
 
 type Server struct {
-	Name        string                // 服务名称
-	IPVersion   string                // IP版本
-	IP          string                // IP地址
-	Port        string                // 端口
-	MsgHandler  iface.IMessageHandler // 路由
-	ConnManager iface.IConnManager    // conn manager
+	Name              string                // 服务名称
+	IPVersion         string                // IP版本
+	IP                string                // IP地址
+	Port              string                // 端口
+	MsgHandler        iface.IMessageHandler // 路由
+	ConnManager       iface.IConnManager    // conn manager
+	OnConnectionStart func(connection iface.IConnection)
+	OnConnectionStop  func(connection iface.IConnection)
 }
 
 func (g *Server) AddRouter(msgType uint32, router iface.IRouter) {
@@ -93,4 +95,25 @@ func NewServer(name string) *Server {
 
 func (g *Server) GetConnManager() iface.IConnManager {
 	return g.ConnManager
+}
+
+// hook methods
+func (g *Server) SetOnConnStart(hookFunc func(conn iface.IConnection)) {
+	g.OnConnectionStart = hookFunc
+}
+
+func (g *Server) SetOnConnStop(hookFunc func(conn iface.IConnection)) {
+	g.OnConnectionStop = hookFunc
+}
+
+func (g *Server) CallOnConnStart(connection iface.IConnection) {
+	if g.OnConnectionStart != nil {
+		g.OnConnectionStart(connection)
+	}
+}
+
+func (g *Server) CallOnCOnnStop(connection iface.IConnection) {
+	if g.OnConnectionStop != nil {
+		g.OnConnectionStop(connection)
+	}
 }

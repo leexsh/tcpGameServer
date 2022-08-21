@@ -15,4 +15,14 @@ type IServer interface {
 	AddRouter(uint32, IRouter)
 
 	GetConnManager() IConnManager
+
+	// register start hook method
+	SetOnConnStart(func(conn IConnection))
+	// register stop hook method
+	SetOnConnStop(func(conn IConnection))
+
+	// call start hook
+	CallOnConnStart(connection IConnection)
+	// call stop hook
+	CallOnCOnnStop(connection IConnection)
 }
